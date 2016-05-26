@@ -1,0 +1,84 @@
+# ///////////// open serial port ////////////
+
+import serial
+import time
+import math
+
+
+ser = serial.Serial(
+    port='COM1',
+    baudrate=2400,
+
+)
+
+
+##############  pelco-P protocol
+
+
+BYTE1 = 'A0' # stx, fixed to A0
+BYTE2 = '00' # address
+
+pan_direction = input('please input pan direction: (1 is left, 2 is right)')
+
+if (pan_direction == 1):
+    BYTE4 = '04'
+elif (pan_direction == 2):
+    BYTE4 = '02'
+
+
+
+pan_speed = input('please input pan speed: (1 is medium, 2 is fast )')
+
+if (pan_speed == 1):
+    BYTE5 = '20'
+elif (pan_speed == 2):
+    BYTE5 = '3F'
+
+
+BYTE3 = '00'
+#BYTE4 = '04'
+#BYTE5 = '3F'
+BYTE6 = '00'
+BYTE7 = 'AF'
+#BYTE8 = '34'
+
+
+BYTE8_int =int(BYTE1,16)^int(BYTE2,16)^int(BYTE3,16)^int(BYTE4,16)^int(BYTE5,16)^int(BYTE6,16)^int(BYTE7,16)
+BYTE8_str = str(hex(BYTE8_int))
+BYTE8 = BYTE8_str[2:]
+
+
+cmd_send_pan_left = BYTE1+BYTE2+BYTE3+BYTE4+BYTE5+BYTE6+BYTE7+BYTE8 # Pan Left at normal speed
+cmd_send_pan_right = "A00000022000AF2D" # Pan Right at normal speed
+cmd_send_tilt_up = "A00000080020AF27" # Tilt Up at normal speed
+cmd_send_tilt_dowm = "A00000100020AF3F" # Tilt Down at normal speed
+
+cmd_send_stop = "A00000000000AF0F" # Stop all actions
+
+
+
+
+
+
+cmd_send_stop = cmd_send_stop.decode("hex")
+
+cmd_send_pan_left = cmd_send_pan_left.decode("hex")
+
+cmd_send_pan_right = cmd_send_pan_right.decode("hex")
+cmd_send_tilt_up = cmd_send_tilt_up.decode("hex")
+cmd_send_tilt_dowm = cmd_send_tilt_dowm.decode("hex")
+
+ser.write(cmd_send_pan_left)
+print (cmd_send_pan_left)
+time.sleep(3)
+ser.write(cmd_send_stop)
+time.sleep(3)
+ser.write(cmd_send_pan_right)
+time.sleep(2)
+ser.write(cmd_send_stop)
+
+ser.close()
+
+
+
+
